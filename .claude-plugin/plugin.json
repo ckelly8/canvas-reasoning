@@ -1,0 +1,22 @@
+{
+  "name": "canvas-reasoning",
+  "description": "Collaborative spatial reasoning via Obsidian-rendered JSON Canvas files. Draws architecture diagrams, data flows, decision graphs, and dependency structures to a .canvas file during reasoning-heavy sessions.",
+  "version": "0.1.0",
+  "author": {
+    "name": "ckelly8",
+    "email": "ckelly8@users.noreply.github.com"
+  },
+  "homepage": "https://github.com/ckelly8/canvas-reasoning",
+  "repository": "https://github.com/ckelly8/canvas-reasoning",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "canvas",
+    "obsidian",
+    "json-canvas",
+    "spatial-reasoning",
+    "brainstorming",
+    "architecture"
+  ],
+  "skills": "./skills/"
+}
