@@ -57,7 +57,15 @@ These belong in **chat**, not the canvas:
 ## Conventions
 
 - **File location & naming:** canvases live in a dedicated canvases directory in the working repo — `docs/canvases/` by default (the folder is `.gitkeep`'d since it's often empty between active sessions). Adjust the location per project if `docs/` doesn't fit the repo's layout. Name as `<topic>.canvas`, or `<date>-<topic>.canvas` when chronological ordering matters. Canvases are checked in — they're part of the reasoning record. Layout-coordinate noise in diffs is accepted as a cost.
-- **Coordinate system:** positive x = right, positive y = down. Coordinates are in pixels.
+- **Coordinate system:** positive x = right, positive y = down. Coordinates are in pixels. Negative coordinates are fine — canvases commonly span negative space. What matters is a clear reading axis, not staying near the origin.
+- **Node types — use all four, not just `text`:**
+  - **`text`** — the default. Markdown content (see below).
+  - **`group`** — a labeled bounding box around a cluster of nodes. Use it to enclose a panel ("current", "proposed", a subsystem boundary) so the grouping is visible, not just implied by proximity. A node belongs to a group purely by sitting inside its rectangle — there is no parent field. Edges may target a `group` by its `id` (e.g. "this decision feeds *that whole panel*"). Required fields: `id`, `type`, `x`, `y`, `width`, `height`; optional `label`, `color`.
+  - **`file`** — a node that points at a **real file in the vault/repo** via a vault-relative `file` path. In Obsidian it renders the file live and is clickable. This is the high-value type for **code-architecture diagrams: the node literally *is* the source file** rather than a hand-copied label that goes stale. Optional `subpath` (e.g. `#SomeHeading`) targets a heading within the file.
+  - **`link`** — a node wrapping an external URL (`url` field): the spec being implemented, a dashboard, a ticket. Keeps the reference anchored in the diagram instead of buried in chat.
+- **Scaffolding — start most canvases with a title node and a legend node** (skip only for tiny throwaway sketches):
+  - **Title node**, top-left: what this canvas is, the **reading axis** ("reads left→right: …"), and links to any sibling canvases. Orients anyone — including you, next session — in one glance.
+  - **Legend node**: what each color means *on this canvas*. Color semantics are only self-documenting if you document them. Keep it next to the title.
 - **Sizing — err larger than feels necessary.** Obsidian's default text-node size is small enough that almost any node with a heading + a few lines of content will show an internal scrollbar, and edge labels collide with adjacent nodes when gutters are tight. The cost of *too-large* is zoomable visual noise; the cost of *too-small* is unreadable nodes and overlapping labels. Default toward more space. Concrete starting points (use as **floors, not targets** — go bigger when in doubt):
   - **Small text nodes** (one-line label + one-line detail): ~300 × 120
   - **Medium text nodes** (heading + 3–4 lines): ~460 × 180
@@ -67,9 +75,37 @@ These belong in **chat**, not the canvas:
   - **Gutter between independent groups:** ~200 px
 
   When iterating to relieve density on an existing canvas, **resize nodes and reposition gutters as separate decisions.** Uniformly scaling every `(x, y, w, h)` by the same factor changes the visual ratio not at all — it's just zoom. To actually open up a cramped canvas, the node-size multiplier and the gutter-size multiplier should differ (commonly: nodes 1.5×, gutters 2–3× on the previously-tight axes).
+- **Layout — compute coordinates, don't eyeball them.** Hand-guessed positions are the #1 source of overlapping, unreadable canvases. Use a **column grid**: assign each node a `(column, row)`, then derive coordinates by accumulation rather than picking numbers.
+  - **x of a column** = (starting x) + Σ(widths of all columns to its left) + (gutter × number of gutters crossed).
+  - **y of a node** = (column's starting y) + Σ(heights of nodes above it in that column) + (gutter × gutters crossed).
+  - *Worked micro-example* — three 460-wide columns, 120 gutter, starting x = 0: column 0 → x = 0; column 1 → x = 0 + 460 + 120 = 580; column 2 → x = 0 + (460 + 460) + (120 × 2) = 1160. Same arithmetic vertically with row heights + the 80 vertical gutter. Stack within a column the same way.
+  - Reading axis sets the grid: left→right for flow/time (columns = stages), top→bottom for hierarchy (rows = levels), side-by-side for comparison (one column block per alternative). When in doubt, leave a column empty rather than crowd — empty space is free; overlap is not.
 - **Colors** (built-in palette `"1"`–`"6"`): `1` red, `2` orange, `3` yellow, `4` green, `5` cyan, `6` purple. Hex strings also work. Use colors to convey state — e.g., `4` green for "decided/chosen", `1` red for "rejected", `5` cyan for "observed fact", no color for neutral commentary.
 - **Edges:** `fromSide`/`toSide` are one of `top`, `right`, `bottom`, `left`. Always pick sides intentionally — auto-routing through wrong sides produces unreadable crossings. Use `label` to name the relationship (`"imports"`, `"depends on"`, `"asserted-equal-to"`).
 - **Markdown in text nodes:** node `text` accepts markdown. Use `## Heading` for the node title and short prose below. Keep nodes to ~3–6 lines of content; if a node needs more, split into linked nodes.
+
+## Worked example
+
+A complete, valid canvas showing the conventions above in one piece — a title node, a legend node, a `group` panel enclosing two nodes (one of them a `file` node pointing at real source), a colored "proposed" node, and an edge that targets the group itself. Coordinates follow the column grid (left panel x≈0, right panel x≈620). Use it as the shape to start from, not content to copy.
+
+```json
+{
+	"nodes":[
+		{"id":"title","type":"text","text":"# Grid renderer — current vs proposed\n\n*Reads left→right. Left panel is what's in `main` today; right is option (a). Sibling: `grid-perf.canvas`.*","x":0,"y":0,"width":520,"height":150},
+		{"id":"legend","type":"text","text":"## Legend\n- 🟩 green — chosen\n- 🟥 red — rejected\n- ⬜ none — neutral / current","x":560,"y":0,"width":360,"height":150},
+		{"id":"panel-current","type":"group","label":"Current","x":0,"y":280,"width":520,"height":420},
+		{"id":"dispatch","type":"text","text":"## Dispatch table\nO(n) scan on every cell write.","x":40,"y":360,"width":440,"height":140},
+		{"id":"src-grid","type":"file","file":"src/renderer/grid.ts","x":40,"y":540,"width":440,"height":120},
+		{"id":"proposed","type":"text","text":"## Proposed (a)\nIndex by region key → O(1) lookup.","x":620,"y":360,"width":300,"height":160,"color":"4"}
+	],
+	"edges":[
+		{"id":"e-dispatch-src","fromNode":"dispatch","fromSide":"bottom","toNode":"src-grid","toSide":"top","label":"lives in"},
+		{"id":"e-current-proposed","fromNode":"panel-current","fromSide":"right","toNode":"proposed","toSide":"left","label":"replace with"}
+	]
+}
+```
+
+The `src-grid` node renders the actual `src/renderer/grid.ts` file in Obsidian — clickable, never stale. Note `panel-current` is a group, and the `e-current-proposed` edge points the whole panel at the proposed node.
 
 ## Inline annotations (user ↔ Claude on the canvas)
 
@@ -88,9 +124,27 @@ The canvas doubles as an async-dialogue surface. When the user wants to ask abou
 1. **Confirm consent** (only if not already given). The user must opt in to the canvas before you start one. Phrase: *"Some of this might be easier to show on an Obsidian canvas. Open one?"* Wait for an answer.
 2. **Pick a canvas file path** under the project's canvases directory (`docs/canvases/` by default).
 3. **Write the initial canvas** — usually a title node + the first architectural diagram needed.
-4. **Tell the user what's on it** in one sentence (e.g., "Wrote the current vs proposed renderer architecture to `grid-system.canvas`. Left panel is what's in tree today; right panel is option (a)").
-5. **Continue the conversation in chat.** Add to or edit the canvas when a new architectural artifact would clarify the next exchange — not on every turn.
-6. **Re-read the canvas at session start** if returning to a session that already has one — it IS the conversation state.
+4. **Validate** after writing or editing — run `py scripts/validate-canvas.py <path>` (script ships in this skill's `scripts/` dir). It catches malformed JSON, duplicate ids, edges pointing at missing nodes, and overlapping nodes. If `py` isn't available, fall back to the checklist in **Validation** below.
+5. **Tell the user what's on it** in one sentence (e.g., "Wrote the current vs proposed renderer architecture to `grid-system.canvas`. Left panel is what's in tree today; right panel is option (a)").
+6. **Continue the conversation in chat.** Add to or edit the canvas when a new architectural artifact would clarify the next exchange — not on every turn.
+7. **Re-read the canvas at session start** if returning to a session that already has one — it IS the conversation state.
+
+## Validation
+
+A `.canvas` file is hand-written JSON with referential integrity (edges name node ids) — easy to break in ways that render badly or not at all. After every write/edit, run the bundled validator:
+
+```bash
+py scripts/validate-canvas.py docs/canvases/<topic>.canvas
+```
+
+It exits non-zero with a readable report on: invalid JSON, duplicate node ids, edges referencing a missing `fromNode`/`toNode`, and overlapping node rectangles (a group legally containing its children is not flagged).
+
+**Fallback checklist** (when `py` is unavailable) — eyeball the file for:
+
+- Parses as JSON (no trailing commas, balanced braces/brackets).
+- Every node `id` is unique; edges only reference ids that exist.
+- Each node has `x`, `y`, `width`, `height`; each edge has `fromNode`/`toNode` (and intentional `fromSide`/`toSide`).
+- No two non-nested rectangles overlap — the hard one to see by eye, which is exactly why the script is preferred. With the column-grid layout (compute, don't guess) overlaps mostly can't happen in the first place.
 
 ## What to NOT do
 

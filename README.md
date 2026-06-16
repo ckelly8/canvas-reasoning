@@ -24,6 +24,8 @@ reasoning discipline, different medium.
 skills/
   canvas-reasoning/
     SKILL.md         # the skill itself
+    scripts/
+      validate-canvas.py  # post-write validator (JSON, ids, dangling edges, overlaps)
 ```
 
 ## Requirements
@@ -54,7 +56,8 @@ be `canvas-reasoning` here.
 Once installed, the skill activates automatically when a session turns reasoning-heavy
 (3+ candidate models, competing debug hypotheses, a dependency-structured plan), or when
 you explicitly ask for a canvas. Claude confirms consent first, writes the canvas under
-`docs/canvases/` (by default), and tells you what's on it. You open the file in Obsidian.
+`docs/canvases/` (by default), validates it with the bundled
+`scripts/validate-canvas.py`, and tells you what's on it. You open the file in Obsidian.
 
 To leave Claude a note on the canvas, add a text node prefixed with `{NOTE}` and connect
 it by an edge to the node(s) it concerns.
@@ -63,7 +66,7 @@ it by an edge to the node(s) it concerns.
 
 Early, single-developer dev tooling — an experiment in whether spatial reasoning between
 user and Claude is worth the workflow cost. Intentionally rough; iterated as sessions
-accumulate evidence. Version `0.1.0`.
+accumulate evidence. Version `0.2.0`.
 
 ## License
 
