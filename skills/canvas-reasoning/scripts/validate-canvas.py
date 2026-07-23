@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Validate a JSON Canvas (.canvas) file.
 
 Checks, in order:
@@ -10,7 +10,7 @@ Checks, in order:
 Exit status is 0 when clean, 1 when any check fails. Output is a human-readable
 report. Run after writing or editing a canvas:
 
-    py scripts/validate-canvas.py docs/canvases/<topic>.canvas
+    python3 scripts/validate-canvas.py docs/canvases/<topic>.canvas
 """
 import json
 import sys
@@ -85,7 +85,7 @@ def validate(path):
 
 def main(argv):
     if len(argv) != 2:
-        print("usage: py validate-canvas.py <path-to.canvas>", file=sys.stderr)
+        print("usage: python3 validate-canvas.py <path-to.canvas>", file=sys.stderr)
         return 2
     errors = validate(argv[1])
     if errors:

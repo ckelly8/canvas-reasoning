@@ -124,7 +124,7 @@ The canvas doubles as an async-dialogue surface. When the user wants to ask abou
 1. **Confirm consent** (only if not already given). The user must opt in to the canvas before you start one. Phrase: *"Some of this might be easier to show on an Obsidian canvas. Open one?"* Wait for an answer.
 2. **Pick a canvas file path** under the project's canvases directory (`docs/canvases/` by default).
 3. **Write the initial canvas** — usually a title node + the first architectural diagram needed.
-4. **Validate** after writing or editing — run `py scripts/validate-canvas.py <path>` (script ships in this skill's `scripts/` dir). It catches malformed JSON, duplicate ids, edges pointing at missing nodes, and overlapping nodes. If `py` isn't available, fall back to the checklist in **Validation** below.
+4. **Validate** after writing or editing — run `python3 scripts/validate-canvas.py <path>` (script ships in this skill's `scripts/` dir). It catches malformed JSON, duplicate ids, edges pointing at missing nodes, and overlapping nodes. If `python3` isn't available, fall back to the checklist in **Validation** below.
 5. **Tell the user what's on it** in one sentence (e.g., "Wrote the current vs proposed renderer architecture to `grid-system.canvas`. Left panel is what's in tree today; right panel is option (a)").
 6. **Continue the conversation in chat.** Add to or edit the canvas when a new architectural artifact would clarify the next exchange — not on every turn.
 7. **Re-read the canvas at session start** if returning to a session that already has one — it IS the conversation state.
@@ -134,12 +134,12 @@ The canvas doubles as an async-dialogue surface. When the user wants to ask abou
 A `.canvas` file is hand-written JSON with referential integrity (edges name node ids) — easy to break in ways that render badly or not at all. After every write/edit, run the bundled validator:
 
 ```bash
-py scripts/validate-canvas.py docs/canvases/<topic>.canvas
+python3 scripts/validate-canvas.py docs/canvases/<topic>.canvas
 ```
 
 It exits non-zero with a readable report on: invalid JSON, duplicate node ids, edges referencing a missing `fromNode`/`toNode`, and overlapping node rectangles (a group legally containing its children is not flagged).
 
-**Fallback checklist** (when `py` is unavailable) — eyeball the file for:
+**Fallback checklist** (when `python3` is unavailable) — eyeball the file for:
 
 - Parses as JSON (no trailing commas, balanced braces/brackets).
 - Every node `id` is unique; edges only reference ids that exist.
