@@ -66,7 +66,13 @@ These belong in **chat**, not the canvas:
 - **Scaffolding — start most canvases with a title node and a legend node** (skip only for tiny throwaway sketches):
   - **Title node**, top-left: what this canvas is, the **reading axis** ("reads left→right: …"), and links to any sibling canvases. Orients anyone — including you, next session — in one glance.
   - **Legend node**: what each color means *on this canvas*. Color semantics are only self-documenting if you document them. Keep it next to the title.
+- **Leaf density — many short leaves, not few long ones.** A leaf node is a label or one short claim, not a paragraph. Think of what a whiteboard diagram looks like: a box holds one word, or three at most. The Obsidian canvas affords slightly more — a leaf can carry one short sentence ("A rename breaks nothing", "Kind never changes") — but not more than that. When a fact has two parts (a claim and its consequence, a rule and its exception), that is **two leaves and an edge**, not one leaf with two sentences. Splitting is the default move whenever a node's text stops being readable at a glance:
+  - **One claim per leaf.** If drafting a node's text requires "and" or a semicolon to fit everything in, split it — each half becomes its own leaf, connected by an edge or grouped together.
+  - **A heading is optional on a leaf; body text almost never needs one.** Reserve `## Heading` + multi-line body for hub nodes (title, legend, a group's one summary card) — never for an ordinary leaf.
+  - **This changes the leaf-count budget, not the total-content budget.** A subject that used to be three medium nodes with 4 lines each becomes ten to fifteen tiny one-line leaves, grouped under a labeled `group` panel with an end-state doc (or source file) linked once for anyone who wants the full prose. More nodes is the intended outcome, not a side effect to minimize.
+  - **Worked reference:** `docs/canvases/overall-product-vision.canvas` in the Deckspace repo — each subject is a `group` of one-line leaves (`"Kind never changes"`, `"A rename breaks nothing"`), with a single `📄 [[end-state-doc.md]]` node per group for detail, and a distinct color reserved for still-open/downstream tickets. Use it as the density model, not the worked example below (which predates this convention and still shows the old, denser style).
 - **Sizing — err larger than feels necessary.** Obsidian's default text-node size is small enough that almost any node with a heading + a few lines of content will show an internal scrollbar, and edge labels collide with adjacent nodes when gutters are tight. The cost of *too-large* is zoomable visual noise; the cost of *too-small* is unreadable nodes and overlapping labels. Default toward more space. Concrete starting points (use as **floors, not targets** — go bigger when in doubt):
+  - **Tiny leaf nodes** (a label or one short sentence, no heading — the default per **Leaf density**): ~300 × 64
   - **Small text nodes** (one-line label + one-line detail): ~300 × 120
   - **Medium text nodes** (heading + 3–4 lines): ~460 × 180
   - **Large / central nodes** (heading + 5+ lines, hub component): ~510 × 330
@@ -82,7 +88,7 @@ These belong in **chat**, not the canvas:
   - Reading axis sets the grid: left→right for flow/time (columns = stages), top→bottom for hierarchy (rows = levels), side-by-side for comparison (one column block per alternative). When in doubt, leave a column empty rather than crowd — empty space is free; overlap is not.
 - **Colors** (built-in palette `"1"`–`"6"`): `1` red, `2` orange, `3` yellow, `4` green, `5` cyan, `6` purple. Hex strings also work. Use colors to convey state — e.g., `4` green for "decided/chosen", `1` red for "rejected", `5` cyan for "observed fact", no color for neutral commentary.
 - **Edges:** `fromSide`/`toSide` are one of `top`, `right`, `bottom`, `left`. Always pick sides intentionally — auto-routing through wrong sides produces unreadable crossings. Use `label` to name the relationship (`"imports"`, `"depends on"`, `"asserted-equal-to"`).
-- **Markdown in text nodes:** node `text` accepts markdown. Use `## Heading` for the node title and short prose below. Keep nodes to ~3–6 lines of content; if a node needs more, split into linked nodes.
+- **Markdown in text nodes:** node `text` accepts markdown. A leaf stays to the one short sentence described in **Leaf density** above. Reserve `## Heading` + ~3–6 lines of prose for hub nodes (title, legend, a rare central/summary node) — if one of those needs more than 6 lines, split the overflow into linked leaves rather than growing the node.
 
 ## Worked example
 
@@ -151,6 +157,7 @@ It exits non-zero with a readable report on: invalid JSON, duplicate node ids, e
 - Don't translate the entire conversation onto the canvas. Most exchanges stay in chat.
 - Don't add canvas nodes for questions you're about to ask the user — ask in chat.
 - Don't pre-emptively scaffold dozens of nodes "in case we need them" — add as the conversation calls for them.
+- Don't write a leaf node with more than one short sentence — that is two claims wearing one node; split it (see **Leaf density**).
 - Don't lay out nodes randomly; intentional placement is the signal. Left-to-right for time/flow, top-to-bottom for hierarchy, side-by-side for comparison.
 - Don't reuse a node's `id` across edits. Pick a stable `id` (short slug like `q1-current-renderer`) and edit the `text` field in place; don't keep renaming ids.
 
