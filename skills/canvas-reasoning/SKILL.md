@@ -85,6 +85,7 @@ The validator warns on any text node over 12 words outside heading lines (`title
 - **Scaffolding — start most canvases with a title node and a legend node** (skip only for tiny throwaway sketches):
   - **Title node**, top-left: what this canvas is, the **reading axis** ("reads left→right: …"), and links to any sibling canvases. Orients anyone — including you, next session — in one glance.
   - **Legend node**: what each color means *on this canvas*. Color semantics are only self-documenting if you document them. Keep it next to the title.
+    - **Every legend entry MUST open with the matching color emoji circle** — `🔴 🟠 🟡 🟢 🔵 🟣`, and `⚪` for uncolored. Write `🔵 cyan — observed fact`, never `cyan — observed fact`. A legend that only *names* a color makes the reader translate a word back into the hue they are looking at, one entry at a time; the circle is the thing their eye is already matching against the nodes, so the mapping lands in one glance rather than a lookup. It also survives being read in a diff, a terminal, or a paste into chat — every context where the canvas colors themselves are invisible.
 - **Sizing — by lines of text.** Obsidian's default card is 250 × 60. At 300 wide a line holds about 26 characters:
   - **Leaf, one line:** 300 × 64
   - **Leaf, two lines:** 300 × 96
@@ -99,7 +100,7 @@ The validator warns on any text node over 12 words outside heading lines (`title
   - *Worked micro-example* — three 460-wide columns, 120 gutter, starting x = 0: column 0 → x = 0; column 1 → x = 0 + 460 + 120 = 580; column 2 → x = 0 + (460 + 460) + (120 × 2) = 1160. Same arithmetic vertically with row heights + the 80 vertical gutter. Stack within a column the same way.
   - Reading axis sets the grid: left→right for flow/time (columns = stages), top→bottom for hierarchy (rows = levels), side-by-side for comparison (one column block per alternative). When in doubt, leave a column empty rather than crowd — empty space is free; overlap is not.
   - **Past ~40 nodes, generate the canvas.** Write a short script in the scratchpad that holds the content as data — groups → clusters → leaves, plus an edge list — and computes every coordinate by the accumulation above. Edit the data and re-run; never hand-edit coordinates on a large canvas. Serialize one node or edge per line (tab-indented, compact JSON, as Obsidian writes it) so a diff shows what changed.
-- **Colors** (built-in palette `"1"`–`"6"`): `1` red, `2` orange, `3` yellow, `4` green, `5` cyan, `6` purple. Hex strings also work. Use colors to convey state — e.g., `4` green for "decided/chosen", `1` red for "rejected", `5` cyan for "observed fact", no color for neutral commentary.
+- **Colors** (built-in palette `"1"`–`"6"`), each with the emoji circle its legend entry must carry: `1` 🔴 red, `2` 🟠 orange, `3` 🟡 yellow, `4` 🟢 green, `5` 🔵 cyan, `6` 🟣 purple, and no color ⚪. Hex strings also work — give those the nearest circle. Use colors to convey state — e.g., `4` 🟢 for "decided/chosen", `1` 🔴 for "rejected", `5` 🔵 for "observed fact", no color for neutral commentary.
 - **Edges:** `fromSide`/`toSide` are one of `top`, `right`, `bottom`, `left`. Always pick sides intentionally — auto-routing through wrong sides produces unreadable crossings. Use `label` to name the relationship in a word or two (`"imports"`, `"binds"`, `"is a"`).
 - **Edges stay short.** Place each group under or beside what it connects to, so an edge spans one gutter. An edge that would cross a group or pass through other nodes is noise: move the group, or drop the edge and let the leaf's words carry the relation. A leaf that sends an edge sits at the end of its cluster nearest the target, so the edge leaves without crossing its neighbours. Group membership is shown by the group box, never by hub→leaf edges — those draw a list.
 - **Markdown in text nodes:** plain text for leaves. `##` only on hubs, `#` only on the title node. Inline code and `[[links]]` are fine.
@@ -112,7 +113,7 @@ A complete, valid canvas showing the conventions above in one piece — a title 
 {
 	"nodes":[
 		{"id":"title","type":"text","text":"# Grid renderer — current vs proposed\n\n*Reads left→right: `main` today, then option (a). Sibling: `grid-perf.canvas`.*","x":0,"y":0,"width":540,"height":150},
-		{"id":"legend","type":"text","text":"## Legend\n🟩 green — chosen\n🟥 red — rejected\n⬜ none — current","x":580,"y":0,"width":380,"height":150},
+		{"id":"legend","type":"text","text":"## Legend\n🟢 green — chosen\n🔴 red — rejected\n⚪ none — current","x":580,"y":0,"width":380,"height":150},
 		{"id":"panel-current","type":"group","label":"Current","x":0,"y":230,"width":380,"height":392},
 		{"id":"dispatch","type":"text","text":"Dispatch table","x":40,"y":270,"width":300,"height":64},
 		{"id":"scan","type":"text","text":"O(n) scan per cell write","x":40,"y":358,"width":300,"height":64},

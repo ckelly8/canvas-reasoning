@@ -66,7 +66,7 @@ it by an edge to the node(s) it concerns.
 
 Early, single-developer dev tooling — an experiment in whether spatial reasoning between
 user and Claude is worth the workflow cost. Intentionally rough; iterated as sessions
-accumulate evidence. Version `0.3.1`.
+accumulate evidence. Version `0.3.2`.
 
 ## License
 
