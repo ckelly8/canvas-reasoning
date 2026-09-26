@@ -1,6 +1,6 @@
 ---
 name: canvas-reasoning
-description: Use during reasoning-heavy sessions (brainstorms, architecture reviews, debugging) when the user has accepted the Obsidian canvas as a visual companion. Draws code-architecture diagrams, data flows, and system-component relationships to a .canvas JSON file that the user opens in Obsidian. NOT for organizing brainstorm questions (those stay in chat).
+description: Use during reasoning-heavy sessions (brainstorms, architecture reviews, debugging) when the user has accepted the Obsidian canvas as a visual companion, and whenever writing or editing any .canvas file. Draws code-architecture diagrams, data flows, and system-component relationships to a .canvas JSON file that the user opens in Obsidian. NOT for organizing brainstorm questions (those stay in chat).
 ---
 
 # Canvas Reasoning
@@ -54,6 +54,25 @@ These belong in **chat**, not the canvas:
 
 **The seeing-vs-reading test:** would the user understand this better by **seeing** it than reading it? If yes, canvas. If no, chat. This matches the [`superpowers:brainstorming` visual-companion](https://github.com/obra/superpowers/blob/main/skills/brainstorming/visual-companion.md) per-question test — same rule, different medium.
 
+## Nodes are labels
+
+A text node says what a box on a whiteboard diagram says: **one to three words**. It may run to one short sentence — about eight words — when the claim needs a verb: "Kind never changes". That is the ceiling.
+
+A text node is exactly one of:
+
+- **a label** — a noun phrase: `Placement`, `Graph screen`, `leads to`;
+- **a claim** — one short sentence: `A rename breaks nothing`;
+- **a hub** — `## Name` plus at most one short line, for a node several edges point at.
+
+More content means more nodes, never a longer node:
+
+- A list inside a node → one leaf per item, stacked in a cluster.
+- Two claims → two leaves. A node whose text needs "and" or a semicolon holds two claims; a claim and its consequence are two leaves and an edge.
+- A heading over several leaves → a labelled `group` around them. Groups nest; a nested group is a sub-heading.
+- Rationale and detail → the document that holds it, reached by a `file` node or a `[[link]]` leaf. The canvas shows the shape; the document holds the words.
+
+The validator warns on any text node over 12 words outside heading lines (`title` and `legend` are exempt).
+
 ## Conventions
 
 - **File location & naming:** canvases live in a dedicated canvases directory in the working repo — `docs/canvases/` by default (the folder is `.gitkeep`'d since it's often empty between active sessions). Adjust the location per project if `docs/` doesn't fit the repo's layout. Name as `<topic>.canvas`, or `<date>-<topic>.canvas` when chronological ordering matters. Canvases are checked in — they're part of the reasoning record. Layout-coordinate noise in diffs is accepted as a cost.
@@ -66,52 +85,50 @@ These belong in **chat**, not the canvas:
 - **Scaffolding — start most canvases with a title node and a legend node** (skip only for tiny throwaway sketches):
   - **Title node**, top-left: what this canvas is, the **reading axis** ("reads left→right: …"), and links to any sibling canvases. Orients anyone — including you, next session — in one glance.
   - **Legend node**: what each color means *on this canvas*. Color semantics are only self-documenting if you document them. Keep it next to the title.
-- **Leaf density — many short leaves, not few long ones.** A leaf node is a label or one short claim, not a paragraph. Think of what a whiteboard diagram looks like: a box holds one word, or three at most. The Obsidian canvas affords slightly more — a leaf can carry one short sentence ("A rename breaks nothing", "Kind never changes") — but not more than that. When a fact has two parts (a claim and its consequence, a rule and its exception), that is **two leaves and an edge**, not one leaf with two sentences. Splitting is the default move whenever a node's text stops being readable at a glance:
-  - **One claim per leaf.** If drafting a node's text requires "and" or a semicolon to fit everything in, split it — each half becomes its own leaf, connected by an edge or grouped together.
-  - **A heading is optional on a leaf; body text almost never needs one.** Reserve `## Heading` + multi-line body for hub nodes (title, legend, a group's one summary card) — never for an ordinary leaf.
-  - **This changes the leaf-count budget, not the total-content budget.** A subject that used to be three medium nodes with 4 lines each becomes ten to fifteen tiny one-line leaves, grouped under a labeled `group` panel with an end-state doc (or source file) linked once for anyone who wants the full prose. More nodes is the intended outcome, not a side effect to minimize.
-  - **Worked reference:** `docs/canvases/overall-product-vision.canvas` in the Deckspace repo — each subject is a `group` of one-line leaves (`"Kind never changes"`, `"A rename breaks nothing"`), with a single `📄 [[end-state-doc.md]]` node per group for detail, and a distinct color reserved for still-open/downstream tickets. Use it as the density model, not the worked example below (which predates this convention and still shows the old, denser style).
-- **Sizing — err larger than feels necessary.** Obsidian's default text-node size is small enough that almost any node with a heading + a few lines of content will show an internal scrollbar, and edge labels collide with adjacent nodes when gutters are tight. The cost of *too-large* is zoomable visual noise; the cost of *too-small* is unreadable nodes and overlapping labels. Default toward more space. Concrete starting points (use as **floors, not targets** — go bigger when in doubt):
-  - **Tiny leaf nodes** (a label or one short sentence, no heading — the default per **Leaf density**): ~300 × 64
-  - **Small text nodes** (one-line label + one-line detail): ~300 × 120
-  - **Medium text nodes** (heading + 3–4 lines): ~460 × 180
-  - **Large / central nodes** (heading + 5+ lines, hub component): ~510 × 330
-  - **Horizontal gutter between columns:** ~120 px (so edge labels fit between nodes)
-  - **Vertical gutter between same-column nodes:** ~80 px (where edge labels collide most)
-  - **Gutter between independent groups:** ~200 px
+- **Sizing — by lines of text.** Obsidian's default card is 250 × 60. At 300 wide a line holds about 26 characters:
+  - **Leaf, one line:** 300 × 64
+  - **Leaf, two lines:** 300 × 96
+  - **Hub** (`## Name` + one line): 300 × 76, plus 32 per wrapped line under the heading
+  - **Title / legend:** as large as they need; they are scaffolding, not leaves
 
-  When iterating to relieve density on an existing canvas, **resize nodes and reposition gutters as separate decisions.** Uniformly scaling every `(x, y, w, h)` by the same factor changes the visual ratio not at all — it's just zoom. To actually open up a cramped canvas, the node-size multiplier and the gutter-size multiplier should differ (commonly: nodes 1.5×, gutters 2–3× on the previously-tight axes).
+  A node that scrolls internally is too small — grow its height; never shrink its text.
+- **Gutters follow the edges.** Stacked leaves in one cluster with no edges between them: ~24 px. Clusters side by side: ~60 px. Anywhere a labelled edge runs: ~120 px across, ~80 px down. Between groups: ~200 px. To open up a cramped canvas, change gutters and node sizes as separate decisions — scaling every `(x, y, w, h)` by one factor is only zoom.
 - **Layout — compute coordinates, don't eyeball them.** Hand-guessed positions are the #1 source of overlapping, unreadable canvases. Use a **column grid**: assign each node a `(column, row)`, then derive coordinates by accumulation rather than picking numbers.
   - **x of a column** = (starting x) + Σ(widths of all columns to its left) + (gutter × number of gutters crossed).
   - **y of a node** = (column's starting y) + Σ(heights of nodes above it in that column) + (gutter × gutters crossed).
   - *Worked micro-example* — three 460-wide columns, 120 gutter, starting x = 0: column 0 → x = 0; column 1 → x = 0 + 460 + 120 = 580; column 2 → x = 0 + (460 + 460) + (120 × 2) = 1160. Same arithmetic vertically with row heights + the 80 vertical gutter. Stack within a column the same way.
   - Reading axis sets the grid: left→right for flow/time (columns = stages), top→bottom for hierarchy (rows = levels), side-by-side for comparison (one column block per alternative). When in doubt, leave a column empty rather than crowd — empty space is free; overlap is not.
+  - **Past ~40 nodes, generate the canvas.** Write a short script in the scratchpad that holds the content as data — groups → clusters → leaves, plus an edge list — and computes every coordinate by the accumulation above. Edit the data and re-run; never hand-edit coordinates on a large canvas. Serialize one node or edge per line (tab-indented, compact JSON, as Obsidian writes it) so a diff shows what changed.
 - **Colors** (built-in palette `"1"`–`"6"`): `1` red, `2` orange, `3` yellow, `4` green, `5` cyan, `6` purple. Hex strings also work. Use colors to convey state — e.g., `4` green for "decided/chosen", `1` red for "rejected", `5` cyan for "observed fact", no color for neutral commentary.
-- **Edges:** `fromSide`/`toSide` are one of `top`, `right`, `bottom`, `left`. Always pick sides intentionally — auto-routing through wrong sides produces unreadable crossings. Use `label` to name the relationship (`"imports"`, `"depends on"`, `"asserted-equal-to"`).
-- **Markdown in text nodes:** node `text` accepts markdown. A leaf stays to the one short sentence described in **Leaf density** above. Reserve `## Heading` + ~3–6 lines of prose for hub nodes (title, legend, a rare central/summary node) — if one of those needs more than 6 lines, split the overflow into linked leaves rather than growing the node.
+- **Edges:** `fromSide`/`toSide` are one of `top`, `right`, `bottom`, `left`. Always pick sides intentionally — auto-routing through wrong sides produces unreadable crossings. Use `label` to name the relationship in a word or two (`"imports"`, `"binds"`, `"is a"`).
+- **Edges stay short.** Place each group under or beside what it connects to, so an edge spans one gutter. An edge that would cross a group or pass through other nodes is noise: move the group, or drop the edge and let the leaf's words carry the relation. A leaf that sends an edge sits at the end of its cluster nearest the target, so the edge leaves without crossing its neighbours. Group membership is shown by the group box, never by hub→leaf edges — those draw a list.
+- **Markdown in text nodes:** plain text for leaves. `##` only on hubs, `#` only on the title node. Inline code and `[[links]]` are fine.
 
 ## Worked example
 
-A complete, valid canvas showing the conventions above in one piece — a title node, a legend node, a `group` panel enclosing two nodes (one of them a `file` node pointing at real source), a colored "proposed" node, and an edge that targets the group itself. Coordinates follow the column grid (left panel x≈0, right panel x≈620). Use it as the shape to start from, not content to copy.
+A complete, valid canvas showing the conventions above in one piece — a title node, a legend node, two `group` panels of leaves (one leaf a `file` node pointing at real source), and an edge that targets a group itself. Every leaf is a label or one short claim; the panel labels carry the headings. Use it as the shape to start from, not content to copy.
 
 ```json
 {
 	"nodes":[
-		{"id":"title","type":"text","text":"# Grid renderer — current vs proposed\n\n*Reads left→right. Left panel is what's in `main` today; right is option (a). Sibling: `grid-perf.canvas`.*","x":0,"y":0,"width":520,"height":150},
-		{"id":"legend","type":"text","text":"## Legend\n- 🟩 green — chosen\n- 🟥 red — rejected\n- ⬜ none — neutral / current","x":560,"y":0,"width":360,"height":150},
-		{"id":"panel-current","type":"group","label":"Current","x":0,"y":280,"width":520,"height":420},
-		{"id":"dispatch","type":"text","text":"## Dispatch table\nO(n) scan on every cell write.","x":40,"y":360,"width":440,"height":140},
-		{"id":"src-grid","type":"file","file":"src/renderer/grid.ts","x":40,"y":540,"width":440,"height":120},
-		{"id":"proposed","type":"text","text":"## Proposed (a)\nIndex by region key → O(1) lookup.","x":620,"y":360,"width":300,"height":160,"color":"4"}
+		{"id":"title","type":"text","text":"# Grid renderer — current vs proposed\n\n*Reads left→right: `main` today, then option (a). Sibling: `grid-perf.canvas`.*","x":0,"y":0,"width":540,"height":150},
+		{"id":"legend","type":"text","text":"## Legend\n🟩 green — chosen\n🟥 red — rejected\n⬜ none — current","x":580,"y":0,"width":380,"height":150},
+		{"id":"panel-current","type":"group","label":"Current","x":0,"y":230,"width":380,"height":392},
+		{"id":"dispatch","type":"text","text":"Dispatch table","x":40,"y":270,"width":300,"height":64},
+		{"id":"scan","type":"text","text":"O(n) scan per cell write","x":40,"y":358,"width":300,"height":64},
+		{"id":"src-grid","type":"file","file":"src/renderer/grid.ts","x":40,"y":482,"width":300,"height":100},
+		{"id":"panel-proposed","type":"group","label":"Proposed (a)","x":580,"y":230,"width":380,"height":232,"color":"4"},
+		{"id":"index","type":"text","text":"Region-key index","x":620,"y":270,"width":300,"height":64},
+		{"id":"lookup","type":"text","text":"O(1) lookup","x":620,"y":358,"width":300,"height":64}
 	],
 	"edges":[
-		{"id":"e-dispatch-src","fromNode":"dispatch","fromSide":"bottom","toNode":"src-grid","toSide":"top","label":"lives in"},
-		{"id":"e-current-proposed","fromNode":"panel-current","fromSide":"right","toNode":"proposed","toSide":"left","label":"replace with"}
+		{"id":"e-scan-src","fromNode":"scan","fromSide":"bottom","toNode":"src-grid","toSide":"top","label":"lives in"},
+		{"id":"e-current-proposed","fromNode":"panel-current","fromSide":"right","toNode":"panel-proposed","toSide":"left","label":"replace with"}
 	]
 }
 ```
 
-The `src-grid` node renders the actual `src/renderer/grid.ts` file in Obsidian — clickable, never stale. Note `panel-current` is a group, and the `e-current-proposed` edge points the whole panel at the proposed node.
+The `src-grid` node renders the actual `src/renderer/grid.ts` file in Obsidian — clickable, never stale. The `e-current-proposed` edge points one whole panel at the other, and `scan` sits last in its panel so its edge to `src-grid` crosses nothing.
 
 ## Inline annotations (user ↔ Claude on the canvas)
 
@@ -130,7 +147,7 @@ The canvas doubles as an async-dialogue surface. When the user wants to ask abou
 1. **Confirm consent** (only if not already given). The user must opt in to the canvas before you start one. Phrase: *"Some of this might be easier to show on an Obsidian canvas. Open one?"* Wait for an answer.
 2. **Pick a canvas file path** under the project's canvases directory (`docs/canvases/` by default).
 3. **Write the initial canvas** — usually a title node + the first architectural diagram needed.
-4. **Validate** after writing or editing — run `python3 scripts/validate-canvas.py <path>` (script ships in this skill's `scripts/` dir). It catches malformed JSON, duplicate ids, edges pointing at missing nodes, and overlapping nodes. If `python3` isn't available, fall back to the checklist in **Validation** below.
+4. **Validate** after writing or editing — run `python3 scripts/validate-canvas.py <path>` (script ships in this skill's `scripts/` dir). It catches malformed JSON, duplicate ids, edges pointing at missing nodes, and overlapping nodes, and warns on wordy nodes. If `python3` isn't available, fall back to the checklist in **Validation** below.
 5. **Tell the user what's on it** in one sentence (e.g., "Wrote the current vs proposed renderer architecture to `grid-system.canvas`. Left panel is what's in tree today; right panel is option (a)").
 6. **Continue the conversation in chat.** Add to or edit the canvas when a new architectural artifact would clarify the next exchange — not on every turn.
 7. **Re-read the canvas at session start** if returning to a session that already has one — it IS the conversation state.
@@ -143,21 +160,22 @@ A `.canvas` file is hand-written JSON with referential integrity (edges name nod
 python3 scripts/validate-canvas.py docs/canvases/<topic>.canvas
 ```
 
-It exits non-zero with a readable report on: invalid JSON, duplicate node ids, edges referencing a missing `fromNode`/`toNode`, and overlapping node rectangles (a group legally containing its children is not flagged).
+It exits non-zero with a readable report on: invalid JSON, duplicate node ids, edges referencing a missing `fromNode`/`toNode`, and overlapping node rectangles (a group legally containing its children is not flagged). It also prints a `WARN` line, without failing, for every text node over 12 words outside heading lines — split each into leaves before telling the user the canvas is ready.
 
 **Fallback checklist** (when `python3` is unavailable) — eyeball the file for:
 
 - Parses as JSON (no trailing commas, balanced braces/brackets).
 - Every node `id` is unique; edges only reference ids that exist.
 - Each node has `x`, `y`, `width`, `height`; each edge has `fromNode`/`toNode` (and intentional `fromSide`/`toSide`).
+- No text node runs past a short sentence, `title` and `legend` aside.
 - No two non-nested rectangles overlap — the hard one to see by eye, which is exactly why the script is preferred. With the column-grid layout (compute, don't guess) overlaps mostly can't happen in the first place.
 
 ## What to NOT do
 
+- Don't write paragraphs into nodes. A node is a label or one short claim; more words means more nodes (see **Nodes are labels**).
 - Don't translate the entire conversation onto the canvas. Most exchanges stay in chat.
 - Don't add canvas nodes for questions you're about to ask the user — ask in chat.
 - Don't pre-emptively scaffold dozens of nodes "in case we need them" — add as the conversation calls for them.
-- Don't write a leaf node with more than one short sentence — that is two claims wearing one node; split it (see **Leaf density**).
 - Don't lay out nodes randomly; intentional placement is the signal. Left-to-right for time/flow, top-to-bottom for hierarchy, side-by-side for comparison.
 - Don't reuse a node's `id` across edits. Pick a stable `id` (short slug like `q1-current-renderer`) and edit the `text` field in place; don't keep renaming ids.
 

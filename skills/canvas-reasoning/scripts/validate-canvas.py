@@ -7,6 +7,10 @@ Checks, in order:
   3. Every edge's fromNode / toNode references an existing node id (no dangling edges).
   4. No two node rectangles overlap (a group legally *containing* its children is allowed).
 
+It also warns, without failing, on wordy text nodes: more than MAX_LEAF_WORDS words
+outside heading lines. A leaf is a label, not a paragraph. The `title` and `legend`
+scaffolding nodes are exempt.
+
 Exit status is 0 when clean, 1 when any check fails. Output is a human-readable
 report. Run after writing or editing a canvas:
 
@@ -14,6 +18,9 @@ report. Run after writing or editing a canvas:
 """
 import json
 import sys
+
+MAX_LEAF_WORDS = 12
+SCAFFOLD_IDS = {"title", "legend"}
 
 
 def _rect(n):
@@ -83,11 +90,34 @@ def validate(path):
     return errors
 
 
+def wordy_nodes(path):
+    """Text nodes whose non-heading words exceed MAX_LEAF_WORDS, as (id, words)."""
+    try:
+        with open(path, encoding="utf-8") as fh:
+            nodes = json.load(fh).get("nodes", [])
+    except (OSError, json.JSONDecodeError):
+        return []
+    out = []
+    for n in nodes:
+        if n.get("type") != "text" or n.get("id") in SCAFFOLD_IDS:
+            continue
+        body = [ln for ln in n.get("text", "").splitlines() if not ln.lstrip().startswith("#")]
+        words = len(" ".join(body).split())
+        if words > MAX_LEAF_WORDS:
+            out.append((n.get("id", "?"), words))
+    return out
+
+
 def main(argv):
     if len(argv) != 2:
         print("usage: python3 validate-canvas.py <path-to.canvas>", file=sys.stderr)
         return 2
     errors = validate(argv[1])
+    wordy = wordy_nodes(argv[1])
+    if wordy:
+        print(f"WARN {len(wordy)} wordy node(s) — split each into leaves of 1-3 words:")
+        for nid, words in wordy:
+            print(f"  - {nid!r}: {words} words")
     if errors:
         print(f"FAIL ({len(errors)} issue(s)):")
         for e in errors:
